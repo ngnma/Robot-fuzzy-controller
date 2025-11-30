@@ -18,16 +18,22 @@ class fuzzy_controller:
             ('far', 'far'): ('fast', 'right')
         }
 
-    def calculate_membership(self, x, zones):
+        self.fuzzy_sets = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
+                           'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
+                           'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
+        
+    def calculate_membership(self, x):
         # This dist contains the degree of membership of each set for x.
         # output exp. {'near': 0, 'medium': 0, 'far': 1}
         outputs = dict()
 
-        for fuzzy_set, corners in zones.items():
-
+        for fs in self.fuzzy_sets.items():
+            fuzzy_set = fs[0]
+            shape = fs[1]['shape']
+            corners = fs[1]['corners']
             a, b, c = corners[0], corners[1], corners[2]
 
-            if fuzzy_set == 'near':
+            if shape == 'left-trap':
                 if x <= b:
                     outputs[fuzzy_set] = 1
                 elif b < x <= c:
@@ -35,7 +41,7 @@ class fuzzy_controller:
                 else:
                     pass
 
-            if fuzzy_set == 'medium':
+            if shape == 'tri-angle':
                 if a < x <= b:
                     outputs[fuzzy_set] = (x-a)/(b-a)
                 elif b < x <= c:
@@ -43,7 +49,7 @@ class fuzzy_controller:
                 else:
                     pass
 
-            if fuzzy_set == 'far':
+            if shape == 'right-trap':
                 if a < x <= b:
                     outputs[fuzzy_set] = (x-a)/(b-a)
                 elif b < x:
@@ -52,6 +58,43 @@ class fuzzy_controller:
                     pass
 
         return outputs
+    
+
+
+    # def calculate_membership(self, x, zones):
+    #     # This dist contains the degree of membership of each set for x.
+    #     # output exp. {'near': 0, 'medium': 0, 'far': 1}
+    #     outputs = dict()
+
+    #     for fuzzy_set, corners in zones.items():
+
+    #         a, b, c = corners[0], corners[1], corners[2]
+
+    #         if fuzzy_set == 'near':
+    #             if x <= b:
+    #                 outputs[fuzzy_set] = 1
+    #             elif b < x <= c:
+    #                 outputs[fuzzy_set] = (c-x)/(c-b)
+    #             else:
+    #                 pass
+
+    #         if fuzzy_set == 'medium':
+    #             if a < x <= b:
+    #                 outputs[fuzzy_set] = (x-a)/(b-a)
+    #             elif b < x <= c:
+    #                 outputs[fuzzy_set] = (c-x)/(c-b)
+    #             else:
+    #                 pass
+
+    #         if fuzzy_set == 'far':
+    #             if a < x <= b:
+    #                 outputs[fuzzy_set] = (x-a)/(b-a)
+    #             elif b < x:
+    #                 outputs[fuzzy_set] = 1
+    #             else:
+    #                 pass
+
+    #     return outputs
     
 
     def calculate_fired_rules(self, rfs_values, rbs_values):
@@ -83,8 +126,8 @@ class fuzzy_controller:
     def fuzzification(self, distances):
         rfs_distance, rbs_distance = distances
 
-        rfs_values = self.calculate_membership(rfs_distance, self.sensor_zone)
-        rbs_values = self.calculate_membership(rbs_distance, self.sensor_zone)
+        rfs_values = self.calculate_membership(rfs_distance)
+        rbs_values = self.calculate_membership(rbs_distance)
         # print("RFS Membership Values: ", rfs_values)
         # print("RBS Membership Values: ", rbs_values)
 
@@ -135,5 +178,12 @@ if __name__ == '__main__':
     for d in distances:
         x, z = fuzzy_flc.run(d)
         print(x,z)
+
+    # fuzzy_sets = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
+    #                        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
+    #                        'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
+    # # print(fuzzy_sets['near']['corners'][1])
+    # for fs in fuzzy_sets.items():
+    #     print(fs[1]['shape'])
 
     # main()
