@@ -145,16 +145,16 @@ def test():
 
     angular_zone = {'right': [-0.5, -0.3, -0.1], 'front': [-0.1, 0, 0.1], 'left': [0.1, 0.2, 0.3]}
 
-    rule_base = {
-            ('near', 'near'): ('medium', 'left'),
-            ('near', 'medium'): ('slow', 'left'),
-            ('near', 'far'): ('medium', 'left'),
-            ('medium', 'near'): ('slow', 'left'), #('medium', 'near'): ('slow', 'right'),
-            ('medium', 'medium'): ('medium', 'front'),
-            ('medium', 'far'): ('medium', 'left'), #('medium', 'far'): ('medium', 'left'),
-            ('far', 'near'): ('fast', 'right'),
-            ('far', 'medium'): ('fast', 'right'),
-            ('far', 'far'): ('fast', 'right')
+    rule_base = { # (RFS, RBS): (linear Motor, angular Motor)
+            ('near', 'near'): ('medium', 'left'), # ||
+            ('near', 'medium'): ('slow', 'left'), # /|
+            ('near', 'far'): ('medium', 'left'), # -|
+            ('medium', 'near'): ('slow', 'left'), #('medium', 'near'): ('slow', 'right'), \|
+            ('medium', 'medium'): ('medium', 'front'), # | |
+            ('medium', 'far'): ('medium', 'left'), # / |
+            ('far', 'near'): ('fast', 'right'), # \|
+            ('far', 'medium'): ('fast', 'right'), # \ |
+            ('far', 'far'): ('fast', 'right') # \   |
         }
         
     flc = fuzzy_controller(
