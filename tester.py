@@ -1,59 +1,56 @@
 #!/usr/bin/env python3
 class fuzzy_controller:
-    def __init__(self):
-        self.sensor_zone = {'near': [0, 0.25, 0.5], 'medium': [0.25, 0.5, 0.75], 'far': [0.5, 0.75, 10]}
+    def __init__(self, sensor_zone={}, linear_zone={}, angular_zone={}, rule_base={}):
+        self.sensor_zone = sensor_zone
+        self.linear_zone = linear_zone
+        self.angular_zone = angular_zone
+        self.rule_base = rule_base
 
-        self.linear_zone = {'slow': [0.025, 0.05, 0.075], 'medium': [0.075, 0.1, 0.125], 'fast': [0.125, 0.15, 0.3]} #'fast': [0.125, 0.15, 0.175]
-        self.angular_zone = {'right': [-0.5, -0.3, -0.1], 'front': [-0.1, 0, 0.1], 'left': [0.1, 0.2, 0.3]}
+    def set_rule(self, antecedents, consequents):
+        self.rule_base[antecedents] = consequents
+        # example -> flc.set_rule(('far', 'far'), ('fast', 'right'))
 
-        self.rule_base = {
-            ('near', 'near'): ('medium', 'left'),
-            ('near', 'medium'): ('slow', 'left'),
-            ('near', 'far'): ('medium', 'left'),
-            ('medium', 'near'): ('slow', 'left'), #('medium', 'near'): ('slow', 'right'),
-            ('medium', 'medium'): ('medium', 'front'),
-            ('medium', 'far'): ('medium', 'left'), #('medium', 'far'): ('medium', 'left'),
-            ('far', 'near'): ('fast', 'right'),
-            ('far', 'medium'): ('fast', 'right'),
-            ('far', 'far'): ('fast', 'right')
-        }
+    def set_sensor_membership(self, set_name, shape, corners):
+        self.sensor_zone[set_name] = {'shape':shape, 'corners':corners}
 
-        self.fuzzy_sets = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
-                           'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
-                           'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
-        
+    def set_linear_membership(self, set_name, shape, corners):
+        self.linear_zone[set_name] = {'shape':shape, 'corners':corners}
+
+    def set_angular_membership(self, set_name, shape, corners):
+        self.angular_zone[set_name] = {'shape':shape, 'corners':corners}
+
     def calculate_membership(self, x):
         # This dist contains the degree of membership of each set for x.
         # output exp. {'near': 0, 'medium': 0, 'far': 1}
         outputs = dict()
 
-        for fs in self.fuzzy_sets.items():
-            fuzzy_set = fs[0]
+        for fs in self.sensor_zone.items():
+            set_name = fs[0]
             shape = fs[1]['shape']
             corners = fs[1]['corners']
             a, b, c = corners[0], corners[1], corners[2]
 
             if shape == 'left-trap':
                 if x <= b:
-                    outputs[fuzzy_set] = 1
+                    outputs[set_name] = 1
                 elif b < x <= c:
-                    outputs[fuzzy_set] = (c-x)/(c-b)
+                    outputs[set_name] = (c-x)/(c-b)
                 else:
                     pass
 
             if shape == 'tri-angle':
                 if a < x <= b:
-                    outputs[fuzzy_set] = (x-a)/(b-a)
+                    outputs[set_name] = (x-a)/(b-a)
                 elif b < x <= c:
-                    outputs[fuzzy_set] = (c-x)/(c-b)
+                    outputs[set_name] = (c-x)/(c-b)
                 else:
                     pass
 
             if shape == 'right-trap':
                 if a < x <= b:
-                    outputs[fuzzy_set] = (x-a)/(b-a)
+                    outputs[set_name] = (x-a)/(b-a)
                 elif b < x:
-                    outputs[fuzzy_set] = 1
+                    outputs[set_name] = 1
                 else:
                     pass
 
@@ -171,19 +168,58 @@ class fuzzy_controller:
 
 # Robot Codes
 
-if __name__ == '__main__':
-    fuzzy_flc = fuzzy_controller()
+def test():
+    
+    sensor_zone = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
+                           'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
+                           'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
+    
+    linear_zone = {'slow': [0.025, 0.05, 0.075], 'medium': [0.075, 0.1, 0.125], 'fast': [0.125, 0.15, 0.3]}
+
+    angular_zone = {'right': [-0.5, -0.3, -0.1], 'front': [-0.1, 0, 0.1], 'left': [0.1, 0.2, 0.3]}
+
+    rule_base = {
+            ('near', 'near'): ('medium', 'left'),
+            ('near', 'medium'): ('slow', 'left'),
+            ('near', 'far'): ('medium', 'left'),
+            ('medium', 'near'): ('slow', 'left'), #('medium', 'near'): ('slow', 'right'),
+            ('medium', 'medium'): ('medium', 'front'),
+            ('medium', 'far'): ('medium', 'left'), #('medium', 'far'): ('medium', 'left'),
+            ('far', 'near'): ('fast', 'right'),
+            ('far', 'medium'): ('fast', 'right'),
+            ('far', 'far'): ('fast', 'right')
+        }
+        
+    flc = fuzzy_controller(
+        sensor_zone = sensor_zone, 
+        linear_zone = linear_zone, 
+        angular_zone = angular_zone,
+        rule_base = rule_base
+    )
 
     distances = [(0.1, 0.5), (0.26, 0.8), (0.7,3)]
     for d in distances:
-        x, z = fuzzy_flc.run(d)
+        x, z = flc.run(d)
         print(x,z)
 
-    # fuzzy_sets = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
-    #                        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
-    #                        'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
-    # # print(fuzzy_sets['near']['corners'][1])
-    # for fs in fuzzy_sets.items():
-    #     print(fs[1]['shape'])
 
-    # main()
+
+if __name__ == '__main__':
+
+    test()
+    # sensor_zone = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
+    #                        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]} 
+    #                        }
+        
+    # flc = fuzzy_controller(sensor_zone = sensor_zone)
+    # print(flc.sensor_zone)
+    # flc.set_membership('far','right-trap',[0.5, 0.75, 10],flc.sensor_zone)
+    # print(flc.sensor_zone)
+
+#     fuzzy_sets = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
+#                            'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
+#                            'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
+
+
+#     flc = fuzzy_controller(fuzzy_sets)
+
