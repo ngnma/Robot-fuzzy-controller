@@ -55,46 +55,9 @@ class fuzzy_controller:
                     pass
 
         return outputs
-    
-
-
-    # def calculate_membership(self, x, zones):
-    #     # This dist contains the degree of membership of each set for x.
-    #     # output exp. {'near': 0, 'medium': 0, 'far': 1}
-    #     outputs = dict()
-
-    #     for fuzzy_set, corners in zones.items():
-
-    #         a, b, c = corners[0], corners[1], corners[2]
-
-    #         if fuzzy_set == 'near':
-    #             if x <= b:
-    #                 outputs[fuzzy_set] = 1
-    #             elif b < x <= c:
-    #                 outputs[fuzzy_set] = (c-x)/(c-b)
-    #             else:
-    #                 pass
-
-    #         if fuzzy_set == 'medium':
-    #             if a < x <= b:
-    #                 outputs[fuzzy_set] = (x-a)/(b-a)
-    #             elif b < x <= c:
-    #                 outputs[fuzzy_set] = (c-x)/(c-b)
-    #             else:
-    #                 pass
-
-    #         if fuzzy_set == 'far':
-    #             if a < x <= b:
-    #                 outputs[fuzzy_set] = (x-a)/(b-a)
-    #             elif b < x:
-    #                 outputs[fuzzy_set] = 1
-    #             else:
-    #                 pass
-
-    #     return outputs
-    
 
     def calculate_fired_rules(self, rfs_values, rbs_values):
+        # this function just works for 2 sensors. for 3 sensors we should have 3 for loops.
         fired_rules = []
         for rfs_var, rfs_degree in rfs_values.items():
 
@@ -105,14 +68,16 @@ class fuzzy_controller:
                 fire_stregth = min(rfs_degree, rbs_degree)
                 
                 rule = self.rule_base.get(sensors)
-                print('FR:',sensors, '-> ',rule, ': ',fire_stregth)
+                # print('FR:',sensors, '-> ',rule, ': ',fire_stregth)
 
                 fired_rules.append((rule,fire_stregth))
         # print("Fired Rules: ", fired_rules)
         print(100*'-')
         return fired_rules
     
-    def centroid_calculation(self, shape, corners):
+
+    
+    def centroid_calculation(self, corners, shape = 'triangle'):
         if shape == 'triangle':
             centroid = (corners[0] + corners[2])/2
         else:
@@ -130,7 +95,7 @@ class fuzzy_controller:
 
         return rfs_values, rbs_values
 
-    def defuzzification(self, fired_rules, linear_zone, angular_zone):
+    def defuzzification(self, fired_rules):
         linear_numerator = 0
         angular_numerator = 0
         denominator = 0
@@ -139,8 +104,8 @@ class fuzzy_controller:
         for (linear_var, angular_var), strength in fired_rules: # fired_rules exp: (('slow', 'left'), 0.75)
 
             # calculate centroids for each output fuzzy set
-            linear_centroid = self.centroid_calculation('triangle', linear_zone[linear_var]) 
-            angular_centroid = self.centroid_calculation('triangle', angular_zone[angular_var])   
+            linear_centroid = self.centroid_calculation(self.linear_zone[linear_var]) 
+            angular_centroid = self.centroid_calculation(self.angular_zone[angular_var])   
 
             # calculate the numerators for linear and angular velocities (weighted sum of centroids and strengths)
             linear_numerator += linear_centroid * strength
@@ -158,10 +123,12 @@ class fuzzy_controller:
     def run(self, sensor_distances):
 
         rfs_values, rbs_values = self.fuzzification(sensor_distances)
+        print(rfs_values)
+        print(rbs_values)
         
         fired_rules = self.calculate_fired_rules(rfs_values, rbs_values)
 
-        linear_velocity, angular_velocity = self.defuzzification(fired_rules, self.linear_zone, self.angular_zone)
+        linear_velocity, angular_velocity = self.defuzzification(fired_rules)
 
         # print(f"Linear Velocity: {linear_velocity}, Angular Velocity: {angular_velocity}")
         return linear_velocity, angular_velocity
@@ -171,8 +138,8 @@ class fuzzy_controller:
 def test():
     
     sensor_zone = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
-                           'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
-                           'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
+                    'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
+                    'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
     
     linear_zone = {'slow': [0.025, 0.05, 0.075], 'medium': [0.075, 0.1, 0.125], 'fast': [0.125, 0.15, 0.3]}
 
@@ -197,29 +164,15 @@ def test():
         rule_base = rule_base
     )
 
-    distances = [(0.1, 0.5), (0.26, 0.8), (0.7,3)]
+    distances = [(0.1, 0.5), (0.26, 0.6), (0.7,3)]
     for d in distances:
         x, z = flc.run(d)
         print(x,z)
 
 
 
+
 if __name__ == '__main__':
 
     test()
-    # sensor_zone = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
-    #                        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]} 
-    #                        }
-        
-    # flc = fuzzy_controller(sensor_zone = sensor_zone)
-    # print(flc.sensor_zone)
-    # flc.set_membership('far','right-trap',[0.5, 0.75, 10],flc.sensor_zone)
-    # print(flc.sensor_zone)
-
-#     fuzzy_sets = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
-#                            'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
-#                            'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
-
-
-#     flc = fuzzy_controller(fuzzy_sets)
 
