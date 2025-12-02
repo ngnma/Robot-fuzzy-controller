@@ -88,14 +88,14 @@ class fuzzy_controller:
             for fs_var, fs_degree in fs_values.items():
             # front-left sensor
                 for fls_var, fls_degree in fls_values.items():
-                    # calculate the fire_stregth 
+                    # calculate the fire_strength 
                     sensors = (frs_var, fs_var, fls_var)
                     degrees = (frs_degree, fs_degree, fls_degree)
-                    fire_stregth = min(degrees) # fire_stregth is the min (AND)
+                    fire_strength = min(degrees) # fire_strength is the min (AND)
 
                     rule = self.rule_base.get(sensors) # search in rule-base for this rule
-                    print('[FR-F-FL]:',sensors, '-> ',rule, ': ',fire_stregth) # print the fired rule
-                    fired_rules.append((rule,fire_stregth)) # if the rule is fired it will be append to fired_rules
+                    print('[FR-F-FL]:',sensors, '-> ', rule, ': ', fire_strength) # print the fired rule
+                    fired_rules.append((rule, fire_strength)) # if the rule is fired it will be append to fired_rules
         print(100*'-')
         return fired_rules
      
@@ -132,20 +132,21 @@ class fuzzy_controller:
         return linear_velocity, angular_velocity
     
     def run(self, sensor_distances):
+        # sensor_values -> Fuzzification -> Inference -> Defuzzification -> motors_speeds
 
-        rfs_values, rbs_values = self.fuzzification(sensor_distances)
-        print(rfs_values)
-        print(rbs_values)
+        # Fuzzification: calculate the degree of membership to each fuzzy set from crisp inputs.
+        frs_values, fs_values, fls_values = self.fuzzification(sensor_distances)
         
-        fired_rules = self.calculate_fired_rules(rfs_values, rbs_values)
+        # Inference: For each rule in rule_base calculate its firing_strenght and returns all fired rules with their firing strengh.
+        fired_rules = self.calculate_fired_rules(frs_values, fs_values, fls_values)
 
+        # Defuzzification: calculate crisp output for motor's speeds from linguistics variables
         linear_velocity, angular_velocity = self.defuzzification(fired_rules)
 
         # print(f"Linear Velocity: {linear_velocity}, Angular Velocity: {angular_velocity}")
         return linear_velocity, angular_velocity
 
 # Robot Codes
-
 def test():
 
     # Fuzzy sets for the three sensors
