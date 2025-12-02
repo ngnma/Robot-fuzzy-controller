@@ -27,12 +27,19 @@ class fuzzy_controller:
     def set_angular_membership(self, set_name, shape, corners):
         self.angular_zone[set_name] = {'shape':shape, 'corners':corners}
 
-    def calculate_membership(self, x):
+    def calculate_membership(self, x, sensor_position):
         # This dist contains the degree of membership of each set for x.
         # output exp. {'near': 0, 'medium': 0, 'far': 1}
         outputs = dict()
 
-        for fs in self.sensor_zone.items():
+        if sensor_position == 'FR':
+            sensor = self.front_right_sensor_zone
+        elif sensor_position == 'F':
+            sensor = self.front_sensor_zone
+        else: # sensor_position is LF
+            sensor = self.front_left_sensor_zone
+
+        for fs in sensor.items():
             set_name = fs[0]
             shape = fs[1]['shape']
             corners = fs[1]['corners']
@@ -68,9 +75,9 @@ class fuzzy_controller:
         # calculate degree of membership to each fuzzy set for all sensor's outputs(distances)
         frs_distance, fs_distance, fls_distance = distances
 
-        frs_values = self.calculate_membership(frs_distance) # front-right
-        fs_values = self.calculate_membership(fs_distance) # front
-        fls_values = self.calculate_membership(fls_distance) # front-left
+        frs_values = self.calculate_membership(frs_distance, 'FR') # front-right
+        fs_values = self.calculate_membership(fs_distance, 'F') # front
+        fls_values = self.calculate_membership(fls_distance, 'FL') # front-left
 
         print("front-right Membership Values: ", frs_values)
         print("front Membership Values: ", fs_values)
@@ -94,7 +101,7 @@ class fuzzy_controller:
                     fire_strength = min(degrees) # fire_strength is the min (AND)
 
                     rule = self.rule_base.get(sensors) # search in rule-base for this rule
-                    print('[FR-F-FL]:',sensors, '-> ', rule, ': ', fire_strength) # print the fired rule
+                    print('[FR-F-FL]:',sensors, '-> ', rule, ': ', f"{fire_strength:.2f}") # print the fired rule
                     fired_rules.append((rule, fire_strength)) # if the rule is fired it will be append to fired_rules
         print(100*'-')
         return fired_rules
@@ -136,7 +143,7 @@ class fuzzy_controller:
 
         # Fuzzification: calculate the degree of membership to each fuzzy set from crisp inputs.
         frs_values, fs_values, fls_values = self.fuzzification(sensor_distances)
-        
+
         # Inference: For each rule in rule_base calculate its firing_strenght and returns all fired rules with their firing strengh.
         fired_rules = self.calculate_fired_rules(frs_values, fs_values, fls_values)
 
@@ -195,7 +202,7 @@ def test():
         ('medium', 'near', 'near'): ('slow', 'right'), # |- |
         ('medium', 'near', 'medium'): ('slow', 'left'), # | - |
         ('medium', 'near', 'far'): ('slow', 'left'), # - |
-        ('medium', 'medium', 'near'): ('slow', 'Right'), # |‾ |
+        ('medium', 'medium', 'near'): ('slow', 'right'), # |‾ |
         ('medium', 'medium', 'medium'): ('slow', 'left'), # | ‾ |  -> Always left
         ('medium', 'medium', 'far'): ('slow', 'left'), #  ‾ |
         ('medium', 'far', 'near'): ('slow', 'right'), # |. |
@@ -221,16 +228,15 @@ def test():
         rule_base = rule_base
     )
 
-    # distances = [(0.1, 0.5), (0.26, 0.6), (0.7,3)]
-    # for d in distances:
-    #     x, z = flc.run(d)
-    #     print(x,z)
+    distances = [(0.1, 0.5, 0.1), (0.26, 0.6, 0.5), (0.7, 3, 1.5)]
+    for d in distances:
+        x, z = flc.run(d)
+        print(x, f"{z:.2f}")
 
 
 
 
 
 if __name__ == '__main__':
-
     test()
 
