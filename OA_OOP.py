@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 class fuzzy_controller:
-    def __init__(self, front_sensor_zones={}, front_right_sensor_zones={}, front_left_sensor_zones={}, linear_zone={}, angular_zone={}, rule_base={}):
-        self.front_sensor_zones = front_sensor_zones
-        self.front_right_sensor_zones = front_right_sensor_zones
-        self.front_left_sensor_zones = front_left_sensor_zones
+    def __init__(self, front_sensor_zone={}, front_right_sensor_zone={}, front_left_sensor_zone={}, linear_zone={}, angular_zone={}, rule_base={}):
+        self.front_sensor_zone = front_sensor_zone
+        self.front_right_sensor_zone = front_right_sensor_zone
+        self.front_left_sensor_zone = front_left_sensor_zone
         self.linear_zone = linear_zone
         self.angular_zone = angular_zone
         self.rule_base = rule_base
@@ -12,8 +12,14 @@ class fuzzy_controller:
         self.rule_base[antecedents] = consequents
         # example -> flc.set_rule(('far', 'far'), ('fast', 'right'))
 
-    def set_sensor_membership(self, set_name, shape, corners):
-        self.sensor_zone[set_name] = {'shape':shape, 'corners':corners}
+    def set_front_right_sensor_membership(self, set_name, shape, corners):
+        self.front_right_sensor_zone[set_name] = {'shape':shape, 'corners':corners}
+
+    def set_front_left_sensor_membership(self, set_name, shape, corners):
+        self.front_left_sensor_zone[set_name] = {'shape':shape, 'corners':corners}
+
+    def set_front_sensor_membership(self, set_name, shape, corners):
+        self.front_sensor_zone[set_name] = {'shape':shape, 'corners':corners}
 
     def set_linear_membership(self, set_name, shape, corners):
         self.linear_zone[set_name] = {'shape':shape, 'corners':corners}
@@ -57,6 +63,20 @@ class fuzzy_controller:
                     pass
 
         return outputs
+    
+    def fuzzification(self, distances):
+        # calculate degree of membership to each fuzzy set for all sensor's outputs(distances)
+        frs_distance, fs_distance, fls_distance = distances
+
+        frs_values = self.calculate_membership(frs_distance) # front-right
+        fs_values = self.calculate_membership(fs_distance) # front
+        fls_values = self.calculate_membership(fls_distance) # front-left
+
+        # print("front-right Membership Values: ", frs_values)
+        # print("front Membership Values: ", fs_values)
+        # print("front-left Membership Values: ", fls_values)
+
+        return frs_values, fs_values, fls_values
 
     def calculate_fired_rules(self, rfs_values, rbs_values):
         # this function just works for 2 sensors. for 3 sensors we should have 3 for loops.
@@ -87,15 +107,7 @@ class fuzzy_controller:
         return centroid
     
 
-    def fuzzification(self, distances):
-        rfs_distance, rbs_distance = distances
 
-        rfs_values = self.calculate_membership(rfs_distance)
-        rbs_values = self.calculate_membership(rbs_distance)
-        # print("RFS Membership Values: ", rfs_values)
-        # print("RBS Membership Values: ", rbs_values)
-
-        return rfs_values, rbs_values
 
     def defuzzification(self, fired_rules):
         linear_numerator = 0
@@ -140,19 +152,19 @@ class fuzzy_controller:
 def test():
 
     # Fuzzy sets for the three sensors
-    front_sensor_zones = {
+    front_sensor_zone = {
         'near': {'shape':'left-trap', 'corners':[0.0, 0.25, 0.75]}, 
         'medium': {'shape':'tri-angle', 'corners':[0.25, 0.75, 0.85]}, 
         'far': {'shape':'right-trap', 'corners':[0.75, 0.85, 1.0]}
     }
     
-    front_right_sensor_zones = {
+    front_right_sensor_zone = {
         'near': {'shape':'left-trap', 'corners':[0.0, 0.25, 0.6],}, 
         'medium': {'shape':'tri-angle', 'corners':[0.25, 0.6, 0.7]}, 
         'far': {'shape':'right-trap', 'corners':[0.6, 0.7, 1.0]}
     }
 
-    front_left_sensor_zones = {
+    front_left_sensor_zone = {
         'near': {'shape':'left-trap', 'corners':[0.0, 0.25, 0.6]}, 
         'medium': {'shape':'tri-angle', 'corners':[0.25, 0.6, 0.7]}, 
         'far': {'shape':'right-trap', 'corners':[0.6, 0.7, 1.0]}
@@ -203,9 +215,9 @@ def test():
     }
         
     flc = fuzzy_controller(
-        front_sensor_zones = front_sensor_zones, 
-        front_right_sensor_zones = front_right_sensor_zones,
-        front_left_sensor_zones = front_left_sensor_zones,
+        front_sensor_zone = front_sensor_zone, 
+        front_right_sensor_zone = front_right_sensor_zone,
+        front_left_sensor_zone = front_left_sensor_zone,
         linear_zone = linear_zone, 
         angular_zone = angular_zone,
         rule_base = rule_base
