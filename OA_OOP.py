@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 class fuzzy_controller:
-    def __init__(self, sensor_zone={}, linear_zone={}, angular_zone={}, rule_base={}):
-        self.sensor_zone = sensor_zone
+    def __init__(self, front_sensor_zones={}, front_right_sensor_zones={}, front_left_sensor_zones={}, linear_zone={}, angular_zone={}, rule_base={}):
+        self.front_sensor_zones = front_sensor_zones
+        self.front_right_sensor_zones = front_right_sensor_zones
+        self.front_left_sensor_zones = front_left_sensor_zones
         self.linear_zone = linear_zone
         self.angular_zone = angular_zone
         self.rule_base = rule_base
@@ -201,7 +203,9 @@ def test():
     }
         
     flc = fuzzy_controller(
-        sensor_zone = sensor_zone, 
+        front_sensor_zones = front_sensor_zones, 
+        front_right_sensor_zones = front_right_sensor_zones,
+        front_left_sensor_zones = front_left_sensor_zones,
         linear_zone = linear_zone, 
         angular_zone = angular_zone,
         rule_base = rule_base
@@ -211,6 +215,7 @@ def test():
     # for d in distances:
     #     x, z = flc.run(d)
     #     print(x,z)
+
 
 
 
