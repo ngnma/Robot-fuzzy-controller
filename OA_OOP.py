@@ -72,27 +72,32 @@ class fuzzy_controller:
         fs_values = self.calculate_membership(fs_distance) # front
         fls_values = self.calculate_membership(fls_distance) # front-left
 
-        # print("front-right Membership Values: ", frs_values)
-        # print("front Membership Values: ", fs_values)
-        # print("front-left Membership Values: ", fls_values)
+        print("front-right Membership Values: ", frs_values)
+        print("front Membership Values: ", fs_values)
+        print("front-left Membership Values: ", fls_values)
 
         return frs_values, fs_values, fls_values
+    
 
-    def calculate_fired_rules(self, rfs_values, rbs_values):
-        # this function just works for 2 sensors. for 3 sensors we should have 3 for loops.
+    def calculate_fired_rules(self, frs_values, fs_values, fls_values):
+        # this function just works for 3 sensors. each loop belongs to one sensor
         fired_rules = []
-        for rfs_var, rfs_degree in rfs_values.items():
+        # front-right sensor
+        for frs_var, frs_degree in frs_values.items():
 
-            for rbs_var, rbs_degree in rbs_values.items():
-                sensors = (rfs_var, rbs_var)
-                degrees = (rfs_degree, rbs_degree)
+            # front sensor
+            for fs_var, fs_degree in fs_values.items():
 
-                fire_stregth = min(rfs_degree, rbs_degree)
-                
-                rule = self.rule_base.get(sensors)
-                # print('FR:',sensors, '-> ',rule, ': ',fire_stregth)
+            # front-left sensor
+                for fls_var, fls_degree in fls_values.items():
+                    sensors = (frs_var, fs_var, fls_var)
+                    degrees = (frs_degree, fs_degree, fls_degree)
+                    fire_stregth = min(degrees)
+                    
+                    rule = self.rule_base.get(sensors)
+                    print('[FR-F-FL]:',sensors, '-> ',rule, ': ',fire_stregth)
 
-                fired_rules.append((rule,fire_stregth))
+                    fired_rules.append((rule,fire_stregth))
         # print("Fired Rules: ", fired_rules)
         print(100*'-')
         return fired_rules
