@@ -84,35 +84,27 @@ class fuzzy_controller:
         fired_rules = []
         # front-right sensor
         for frs_var, frs_degree in frs_values.items():
-
             # front sensor
             for fs_var, fs_degree in fs_values.items():
-
             # front-left sensor
                 for fls_var, fls_degree in fls_values.items():
+                    # calculate the fire_stregth 
                     sensors = (frs_var, fs_var, fls_var)
                     degrees = (frs_degree, fs_degree, fls_degree)
-                    fire_stregth = min(degrees)
-                    
-                    rule = self.rule_base.get(sensors)
-                    print('[FR-F-FL]:',sensors, '-> ',rule, ': ',fire_stregth)
+                    fire_stregth = min(degrees) # fire_stregth is the min (AND)
 
-                    fired_rules.append((rule,fire_stregth))
-        # print("Fired Rules: ", fired_rules)
+                    rule = self.rule_base.get(sensors) # search in rule-base for this rule
+                    print('[FR-F-FL]:',sensors, '-> ',rule, ': ',fire_stregth) # print the fired rule
+                    fired_rules.append((rule,fire_stregth)) # if the rule is fired it will be append to fired_rules
         print(100*'-')
         return fired_rules
-    
-
-    
+     
     def centroid_calculation(self, corners, shape = 'triangle'):
         if shape == 'triangle':
             centroid = (corners[0] + corners[2])/2
         else:
             pass
         return centroid
-    
-
-
 
     def defuzzification(self, fired_rules):
         linear_numerator = 0
