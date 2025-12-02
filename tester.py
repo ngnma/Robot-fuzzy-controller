@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-class fuzzy_controller:
+class FuzzyController:
     def __init__(self, sensor_zone={}, linear_zone={}, angular_zone={}, rule_base={}):
         self.sensor_zone = sensor_zone
         self.linear_zone = linear_zone
@@ -157,7 +157,7 @@ def test():
             ('far', 'far'): ('fast', 'right') # \   |
         }
         
-    flc = fuzzy_controller(
+    flc = FuzzyController(
         sensor_zone = sensor_zone, 
         linear_zone = linear_zone, 
         angular_zone = angular_zone,

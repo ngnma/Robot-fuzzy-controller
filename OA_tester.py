@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-class fuzzy_controller:
+class FuzzyController:
     def __init__(self, front_sensor_zone={}, front_right_sensor_zone={}, front_left_sensor_zone={}, linear_zone={}, angular_zone={}, rule_base={}):
         self.front_sensor_zone = front_sensor_zone
         self.front_right_sensor_zone = front_right_sensor_zone
@@ -219,7 +219,7 @@ def test():
         ('far', 'far', 'far'): ('slow', 'front'), # (coridoor)-> ('fast', 'front')
     }
         
-    flc = fuzzy_controller(
+    flc = FuzzyController(
         front_sensor_zone = front_sensor_zone, 
         front_right_sensor_zone = front_right_sensor_zone,
         front_left_sensor_zone = front_left_sensor_zone,
@@ -240,3 +240,14 @@ def test():
 if __name__ == '__main__':
     test()
 
+
+
+
+    # regions_ = {
+    #     #LIDAR readings are anti-clockwise, starting at 0 on the right-most edge of the LiDaR FOV.
+    #     'front': find_nearest(msg.ranges[0:10]),
+    #     'front_right': find_nearest(msg.ranges[310:320]),
+    #     'front_left': find_nearest(msg.ranges[40:50])
+    #     }
+    
+    # distances = (regions['front_right'], regions['front'], regions['front_left'])
