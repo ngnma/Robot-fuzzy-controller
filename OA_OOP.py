@@ -137,16 +137,40 @@ class fuzzy_controller:
 
 def test():
 
+    # Fuzzy sets for the three sensors
+    front_sensor_zones = {
+        'near': {'shape':'left-trap', 'corners':[0.0, 0.25, 0.75]}, 
+        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.75, 0.85]}, 
+        'far': {'shape':'right-trap', 'corners':[0.75, 0.85, 1.0]}
+    }
     
-    sensor_zone = {'near': {'shape':'left-trap', 'corners':[0, 0.25, 0.5]}, 
-                    'medium': {'shape':'tri-angle', 'corners':[0.25, 0.5, 0.75]}, 
-                    'far': {'shape':'right-trap', 'corners':[0.5, 0.75, 10]}}
-    
-    linear_zone = {'slow': [0.025, 0.05, 0.075], 'medium': [0.075, 0.1, 0.125], 'fast': [0.125, 0.15, 0.3]}
+    front_right_sensor_zones = {
+        'near': {'shape':'left-trap', 'corners':[0.0, 0.25, 0.6],}, 
+        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.6, 0.7]}, 
+        'far': {'shape':'right-trap', 'corners':[0.6, 0.7, 1.0]}
+    }
 
-    angular_zone = {'right': [-0.5, -0.3, -0.1], 'front': [-0.1, 0, 0.1], 'left': [0.1, 0.2, 0.3]}
+    front_left_sensor_zones = {
+        'near': {'shape':'left-trap', 'corners':[0.0, 0.25, 0.6]}, 
+        'medium': {'shape':'tri-angle', 'corners':[0.25, 0.6, 0.7]}, 
+        'far': {'shape':'right-trap', 'corners':[0.6, 0.7, 1.0]}
+    }
 
-    rule_base = { # (right front sensor, front sesnor, left front sensor): (linear motor, angular motor)
+    # Speeds (direction and speed)
+    linear_zone = {
+        'slow': [0.025, 0.05, 0.075], 
+        'medium': [0.075, 0.1, 0.125], 
+        'fast': [0.125, 0.15, 0.3]
+    }
+
+    angular_zone = {
+        'right': [-0.5, -0.3, -0.1], 
+        'front': [-0.1, 0, 0.1], 
+        'left': [0.1, 0.2, 0.3]
+    }
+
+    # Rule base (right front sensor, front sesnor, left front sensor): (linear motor, angular motor)
+    rule_base = { 
         ('near', 'near', 'near'): ('slow', 'left'), # |-| -> Always left
         ('near', 'near', 'medium'): ('slow', 'left'), # | -|
         ('near', 'near', 'far'): ('slow', 'left'), # -|
@@ -174,7 +198,7 @@ def test():
         ('far', 'far', 'near'): ('slow', 'right'), # |. ('medium', 'right')
         ('far', 'far', 'medium'): ('slow', 'right'), # | .
         ('far', 'far', 'far'): ('slow', 'front'), # (coridoor)-> ('fast', 'front')
-        }
+    }
         
     flc = fuzzy_controller(
         sensor_zone = sensor_zone, 
