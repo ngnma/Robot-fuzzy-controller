@@ -23,3 +23,18 @@ A fuzzy controller that keeps the robot aligned with and following the right wal
 A fuzzy controller that enables the robot to react to and avoid frontal obstacles.
 ### Multi-Behaviour Controller (Context-Blending)
 A combined fuzzy controller that blends right-edge following and obstacle avoidance, enabling the robot to follow the wall while simultaneously reacting to nearby obstacles.
+
+---
+## 📂 Project Structure
+
+```
+.
+├── data/
+├── tests/
+├── controllers/
+│   ├── OA_FLC.py  # obstacle-avoidance Fuzzy-logic-controller
+│   ├── PID.py     # right-edge-following PID-controller
+│   ├── REF_FLC.py # right-edge-following Fuzzy-logic-controller
+└── README.md
+```
+
